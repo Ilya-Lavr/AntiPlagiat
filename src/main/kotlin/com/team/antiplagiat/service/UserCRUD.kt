@@ -1,4 +1,4 @@
-package com.team.antiplagiat.service
+package com.team.antiplagiat.models.user.service
 
 import com.team.antiplagiat.models.user.User
 import org.springframework.stereotype.Service
