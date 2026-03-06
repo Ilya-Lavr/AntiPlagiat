@@ -1,11 +1,12 @@
 package com.team.antiplagiat.service
 
+import com.team.antiplagiat.SolutionConfig
 import com.team.antiplagiat.models.Solution
 import org.springframework.stereotype.Service
 
 @Service
-class SolutionService(
-    private val properties: AntiPlagiatProperties
+class SolutionCRUD(
+    private val properties: SolutionConfig
 ) : ServiceCRUD<Solution> {
 
     override val entities = mutableMapOf<Long, Solution>()

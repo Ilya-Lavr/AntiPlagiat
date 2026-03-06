@@ -1,8 +1,8 @@
-package com.team.antiplagiat.service
+package com.team.antiplagiat
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "antiplagiat")
-class AntiPlagiatProperties {
+class SolutionConfig {
     var maxAttempts: Int = 50
 }

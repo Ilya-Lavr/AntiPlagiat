@@ -7,7 +7,7 @@ import com.team.antiplagiat.service.ProblemCrudService
 import org.springframework.boot.CommandLineRunner
 import com.team.antiplagiat.models.Contest
 import com.team.antiplagiat.models.Solution
-import com.team.antiplagiat.service.SolutionService
+import com.team.antiplagiat.service.SolutionCRUD
 import java.time.LocalDateTime
 import org.springframework.stereotype.Component
 
@@ -16,7 +16,7 @@ class CommandLineRunner(
     private val problemService: ProblemCrudService,
     private val userService: UserCRUD,
     private val contestService: ContestCRUD,
-    private val solutionService: SolutionService
+    private val solutionService: SolutionCRUD
 ) : CommandLineRunner {
 
     override fun run(vararg args: String?) {
