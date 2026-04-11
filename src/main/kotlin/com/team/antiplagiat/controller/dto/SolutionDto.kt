@@ -1,48 +1,48 @@
 package com.team.antiplagiat.controller.dto
 
 import com.team.antiplagiat.models.Solution
+import com.team.antiplagiat.models.User
+import com.team.antiplagiat.models.Problem
 import java.time.LocalDateTime
 
-data class NewSolutionResponse(
-    val solutionId: Long
-)
-
-data class NewSolutionRequest(
+data class SolutionRequest(
     val userId: Long,
-    val taskId: Long,
-    val language: String,
-    val filePath: String
-)
-
-fun NewSolutionRequest.toEntity(): Solution {
-    return Solution(
-        id = 0,
-        userId = this.userId,
-        taskId = this.taskId,
-        language = this.language,
-        filePath = this.filePath,
-        date = LocalDateTime.now()
-    )
-}
-
-data class GetSolutionResponse(
-    val id: Long,
-    val userId: Long,
-    val taskId: Long,
+    val problemId: Long,
     val language: String,
     val filePath: String,
-    val createdAt: LocalDateTime
+    val code: String?
 )
 
-fun Solution.toResponse() = GetSolutionResponse(
-    id = this.id,
-    userId = this.userId,
-    taskId = this.taskId,
+data class SolutionResponse(
+    val id: Long,
+    val userId: Long,
+    val problemId: Long,
+    val language: String,
+    val status: String,
+    val submittedAt: LocalDateTime,
+    val filePath: String,
+    val code: String?
+) {
+    companion object {
+        fun fromEntity(solution: Solution): SolutionResponse = SolutionResponse(
+            id = solution.id,
+            userId = solution.user.id,
+            problemId = solution.problem.id,
+            language = solution.language,
+            status = solution.status,
+            submittedAt = solution.submittedAt,
+            filePath = solution.filePath,
+            code = solution.code
+        )
+    }
+}
+
+fun SolutionRequest.toEntity(user: User, problem: Problem): Solution = Solution(
+    user = user,
+    problem = problem,
     language = this.language,
+    status = "waiting",
+    submittedAt = LocalDateTime.now(),
     filePath = this.filePath,
-    createdAt = this.date
-)
-
-data class GetCountResponse(
-    val count: Int
+    code = this.code
 )

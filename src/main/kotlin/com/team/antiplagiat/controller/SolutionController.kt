@@ -1,68 +1,50 @@
-package com.team.antiplagiat.controller.SolutionController
+package com.team.antiplagiat.controller
 
-import com.team.antiplagiat.controller.dto.GetCountResponse
-import com.team.antiplagiat.controller.dto.NewSolutionRequest
-import com.team.antiplagiat.controller.dto.NewSolutionResponse
-import com.team.antiplagiat.controller.dto.toEntity
-import com.team.antiplagiat.controller.dto.toResponse
-import com.team.antiplagiat.repository.SolutionRepository
+import com.team.antiplagiat.controller.dto.SolutionRequest
+import com.team.antiplagiat.controller.dto.SolutionResponse
+import com.team.antiplagiat.service.SolutionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/solutions")
-class SolutionController(private val solutionRepository: SolutionRepository) {
+@RequestMapping("/api/solutions")
+class SolutionController(private val solutionService: SolutionService) {
 
     @PostMapping
-    fun newSolution(@RequestBody request: NewSolutionRequest): ResponseEntity<NewSolutionResponse> {
-        val solutionId = solutionRepository.add(request.toEntity())
-        return if (solutionId != 0L) {
-            ResponseEntity.status(HttpStatus.CREATED).body(NewSolutionResponse(solutionId))
-        } else {
-            ResponseEntity.status(HttpStatus.CONFLICT).body(NewSolutionResponse(-1))
-        }
+    fun create(@RequestBody request: SolutionRequest): ResponseEntity<SolutionResponse> {
+        val solution = solutionService.create(
+            userId = request.userId,
+            problemId = request.problemId,
+            language = request.language,
+            filePath = request.filePath,
+            code = request.code
+        ) ?: return ResponseEntity.badRequest().build()
+        return ResponseEntity.status(HttpStatus.CREATED).body(SolutionResponse.fromEntity(solution))
     }
-
-//    Пример для запроса
-//    {
-//        "userId" : 101,
-//        "taskId" : 202,
-//        "language" : "kotlin",
-//        "filePath" : "path"
-//    }
-
-
 
     @GetMapping("/{id}")
-    fun getSolutionById(@PathVariable id: Long): ResponseEntity<Any> {
-        val solution = solutionRepository.findById(id)
-        return if (solution != null) {
-            ResponseEntity.ok().body(solution.toResponse())
-        } else {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Solution with id = $id not found")
-        }
+    fun get(@PathVariable id: Long): ResponseEntity<SolutionResponse> {
+        val solution = solutionService.findById(id) ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(SolutionResponse.fromEntity(solution))
     }
 
-    @GetMapping("/all")
-    fun getAllSolutions(): ResponseEntity<Any> {
-        val solutions = solutionRepository.findAll()
-        return if (solutions.isEmpty()) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Solution list is empty")
-        } else {
-            ResponseEntity.ok().body(solutions.map { it.toResponse() })
-        }
+    @GetMapping
+    fun getAll(): List<SolutionResponse> = solutionService.findAll().map { SolutionResponse.fromEntity(it) }
+
+    @GetMapping("/user/{userId}")
+    fun getByUser(@PathVariable userId: Long): List<SolutionResponse> =
+        solutionService.findByUser(userId).map { SolutionResponse.fromEntity(it) }
+
+    @PatchMapping("/{id}/status")
+    fun updateStatus(@PathVariable id: Long, @RequestParam status: String): ResponseEntity<SolutionResponse> {
+        val updated = solutionService.updateStatus(id, status) ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(SolutionResponse.fromEntity(updated))
     }
 
-    @GetMapping("/count")
-    fun getSolutionsCount(): ResponseEntity<GetCountResponse> {
-        val count = solutionRepository.count()
-        return ResponseEntity.ok().body(GetCountResponse(count))
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable id: Long): ResponseEntity<Void> {
+        solutionService.delete(id)
+        return ResponseEntity.noContent().build()
     }
 }
